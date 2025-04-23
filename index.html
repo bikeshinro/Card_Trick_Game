@@ -1,147 +1,92 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>21 Card Trick</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #f8f8f8;
-    }
+<script>
+  const suits = ['clubs', 'diamonds', 'hearts', 'spades'];
+  const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace'];
 
-    h2 {
-      margin-top: 20px;
-    }
+  function getCardImage(suit, rank) {
+    return `https://raw.githubusercontent.com/hayeah/playing-cards-assets/master/png/${suit}_${rank}.png`;
+  }
 
-    .card {
-      display: inline-block;
-      margin: 5px;
-      padding: 10px;
-      background: #ffffff;
-      border: 2px solid #444;
-      border-radius: 8px;
-      width: 50px;
-      text-align: center;
-      box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
-      transition: transform 0.2s ease, background-color 0.3s ease;
-      opacity: 0;
-      animation: fadeIn 0.6s forwards;
-    }
-
-    .card:hover {
-      transform: scale(1.1);
-      background-color: #e0f7fa;
-      cursor: pointer;
-    }
-
-    .pile {
-      display: inline-block;
-      vertical-align: top;
-      margin: 20px;
-    }
-
-    .button {
-      margin: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #1976d2;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    .button:hover {
-      background-color: #0d47a1;
-    }
-
-    #result {
-      font-size: 28px;
-      color: #2e7d32;
-      margin-top: 20px;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-  </style>
-</head>
-<body>
-  <h2>Pick a card in your mind and remember it</h2>
-  <div id="piles-container"></div>
-  <div id="choose-pile"></div>
-  <div id="result"></div>
-
-  <script>
-    let cards = Array.from({length: 21}, (_, i) => i + 1);
-    let round = 0;
-
-    function displayPiles() {
-      let piles = [[], [], []];
-      for (let i = 0; i < cards.length; i++) {
-        piles[i % 3].push(cards[i]);
-      }
-
-      const container = document.getElementById("piles-container");
-      container.innerHTML = "";
-      piles.forEach((pile, index) => {
-        const div = document.createElement("div");
-        div.className = "pile";
-        div.innerHTML = `<strong>Pile ${index + 1}</strong><br>` + pile.map(c => `<div class="card">${c}</div>`).join("");
-        container.appendChild(div);
-      });
-
-      const choiceDiv = document.getElementById("choose-pile");
-      choiceDiv.innerHTML = "<p>Which pile is your card in?</p>";
-      for (let i = 0; i < 3; i++) {
-        const btn = document.createElement("button");
-        btn.className = "button";
-        btn.textContent = `Pile ${i + 1}`;
-        btn.onclick = () => choosePile(i);
-        choiceDiv.appendChild(btn);
+  function shuffleDeck() {
+    const fullDeck = [];
+    for (let suit of suits) {
+      for (let rank of ranks) {
+        fullDeck.push({ suit, rank });
       }
     }
+    return fullDeck.sort(() => Math.random() - 0.5).slice(0, 21);
+  }
 
-    function choosePile(pileIndex) {
-      let piles = [[], [], []];
-      for (let i = 0; i < cards.length; i++) {
-        piles[i % 3].push(cards[i]);
-      }
+  let cards = shuffleDeck();
+  let round = 0;
 
-      const [a, b, c] = piles;
-      if (pileIndex === 0) cards = b.concat(a, c);
-      if (pileIndex === 1) cards = a.concat(b, c);
-      if (pileIndex === 2) cards = a.concat(c, b);
-
-      round++;
-
-      if (round === 3) {
-        document.getElementById("choose-pile").innerHTML = "";
-        document.getElementById("result").textContent = `Your card is: ${cards[10]}`;
-        addReplayButton();
-      } else {
-        displayPiles();
-      }
+  function displayPiles() {
+    let piles = [[], [], []];
+    for (let i = 0; i < cards.length; i++) {
+      piles[i % 3].push(cards[i]);
     }
 
-    function addReplayButton() {
-      const replayBtn = document.createElement("button");
-      replayBtn.textContent = "Play Again";
-      replayBtn.className = "button";
-      replayBtn.onclick = () => {
-        cards = Array.from({length: 21}, (_, i) => i + 1);
-        round = 0;
-        document.getElementById("result").textContent = "";
-        displayPiles();
-      };
-      document.getElementById("choose-pile").appendChild(replayBtn);
+    const container = document.getElementById("piles-container");
+    container.innerHTML = "";
+    piles.forEach((pile, index) => {
+      const div = document.createElement("div");
+      div.className = "pile";
+      div.innerHTML = `<strong>Pile ${index + 1}</strong><br>` + pile.map(card =>
+        `<img class="card" src="${getCardImage(card.suit, card.rank)}" alt="${card.rank} of ${card.suit}">`
+      ).join("");
+      container.appendChild(div);
+    });
+
+    const choiceDiv = document.getElementById("choose-pile");
+    choiceDiv.innerHTML = "<p>Which pile is your card in?</p>";
+    for (let i = 0; i < 3; i++) {
+      const btn = document.createElement("button");
+      btn.className = "button";
+      btn.textContent = `Pile ${i + 1}`;
+      btn.onclick = () => choosePile(i);
+      choiceDiv.appendChild(btn);
+    }
+  }
+
+  function choosePile(pileIndex) {
+    let piles = [[], [], []];
+    for (let i = 0; i < cards.length; i++) {
+      piles[i % 3].push(cards[i]);
     }
 
-    // Load on page open
-    displayPiles();
-  </script>
-</body>
-</html>
+    const [a, b, c] = piles;
+    if (pileIndex === 0) cards = b.concat(a, c);
+    if (pileIndex === 1) cards = a.concat(b, c);
+    if (pileIndex === 2) cards = a.concat(c, b);
+
+    round++;
+
+    if (round === 3) {
+      document.getElementById("choose-pile").innerHTML = "";
+      const chosenCard = cards[10];
+      const imageUrl = getCardImage(chosenCard.suit, chosenCard.rank);
+      document.getElementById("result").innerHTML = `
+        Your card is: <br>
+        <img class="card" src="${imageUrl}" alt="${chosenCard.rank} of ${chosenCard.suit}">
+      `;
+      addReplayButton();
+    } else {
+      displayPiles();
+    }
+  }
+
+  function addReplayButton() {
+    const replayBtn = document.createElement("button");
+    replayBtn.textContent = "Play Again";
+    replayBtn.className = "button";
+    replayBtn.onclick = () => {
+      cards = shuffleDeck();
+      round = 0;
+      document.getElementById("result").innerHTML = "";
+      displayPiles();
+    };
+    document.getElementById("choose-pile").appendChild(replayBtn);
+  }
+
+  // Load on page open
+  displayPiles();
+</script>
